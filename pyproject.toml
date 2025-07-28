@@ -1,0 +1,21 @@
+[project]
+name = "adk-samples"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "google-adk[extensions]>=1.7.0",
+    "langchain-community>=0.3.27",
+    "langchain-google-genai>=2.0.10",
+    "langchain[anthropic,openai]>=0.3.26",
+    "langgraph>=0.5.3",
+    "litellm>=1.74.4",
+    "openai>=1.97.0",
+    "wikipedia>=1.4.0",
+]
+
+[dependency-groups]
+dev = [
+    "ipykernel>=6.29.5",
+]
