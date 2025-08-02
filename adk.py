@@ -1,3 +1,5 @@
+import os
+from pathlib import Path
 from google.adk.sessions import DatabaseSessionService, InMemorySessionService
 from google.adk.runners import Runner
 from google.adk import Agent
@@ -11,17 +13,35 @@ from google.genai import types
 
 from portfolio_assessment_agent.agent import portfolio_assessment_agent
 
-db_url = "sqlite:///./my_agent_data.db"
+# Build SQLite DB URL from PROJECT_DATA_DIR as well
+# Default filename if only a directory is provided
+PROJECT_DATA_DIR = os.environ.get("PROJECT_DATA_DIR")
+if not PROJECT_DATA_DIR:
+    raise RuntimeError("PROJECT_DATA_DIR environment variable is not set")
+
+data_dir_path = Path(PROJECT_DATA_DIR)
+db_file = data_dir_path / "portfolio" / "my_agent_data.db"
+db_url = f"sqlite:///{db_file}"
+
 session_service_stateful = DatabaseSessionService(db_url=db_url)
 
 import json
-with open("/home/al/Projects/inv-agent/puppeteer_instance/ksei/ksei_cleaned.json", "r") as f:
-    ksei_cleaned = json.load(f)
-with open("/home/al/Projects/inv-agent/puppeteer_instance/debank/debank_cleaned.json", "r") as f:
-    debank_cleaned = json.load(f)
 
-combined_portfolio = {"ksei": ksei_cleaned, "debank_cleaned": debank_cleaned}
+# Resolve data file paths relative to PROJECT_DATA_DIR
+base = data_dir_path
 
+ksei_path = base / "portfolio" / "curated" / "ksei.json"
+debank_path = base / "portfolio" / "curated" / "debank.json"
+wallet_path = base / "portfolio" / "curated" / "wallet.json"
+
+with open(ksei_path, "r") as f:
+    ksei_curated = json.load(f)
+with open(debank_path, "r") as f:
+    debank_curated = json.load(f)
+with open(wallet_path, "r") as f:
+    wallet_curated = json.load(f)
+
+combined_portfolio = {"ksei": ksei_curated, "debank": debank_curated, "wallet": wallet_curated}
 
 async def call_agent_async(query: str, runner, user_id, session_id):
     """Sends a query to the agent and prints the final response."""
